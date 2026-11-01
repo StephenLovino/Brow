@@ -14,13 +14,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f3f4f9;
+    --bg: #faf8f2;
     --card: #ffffff;
-    --ink: #14152b;
-    --muted: #62647a;
-    --line: #e2e4ef;
-    --accent: #5b5cf0;
-    --accent-soft: #e6e6ff;
+    --ink: #141414;
+    --muted: #67635a;
+    --line: #ebe6d6;
+    --accent: #ffc400;
+    --accent-soft: #fff4cc;
+    --accent-ink: #5c4a00;
     --green: #22c55e;
     --radius: 24px;
     --display: "Bricolage Grotesque", system-ui, sans-serif;
@@ -56,7 +57,7 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .pill:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
-  .pill.dark { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .pill.dark { background: var(--ink); color: var(--accent); border-color: var(--ink); }
   .pill svg { width: 16px; height: 16px; }
 
   /* ---------- Hero ---------- */
@@ -81,7 +82,7 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .btn:hover { transform: translateY(-2px); }
-  .btn.primary { background: var(--accent); color: #fff; box-shadow: 0 10px 26px rgba(91,92,240,.35); min-width: 240px; }
+  .btn.primary { background: var(--ink); color: var(--accent); box-shadow: 0 10px 24px rgba(0,0,0,.18); min-width: 240px; }
   .btn.secondary { background: var(--card); border: 1px solid var(--line); color: var(--ink); min-width: 240px; }
   .btn svg { width: 18px; height: 18px; }
   .fine { color: #9a9a9a; font-size: 13px; margin-top: 4px; }
@@ -101,9 +102,9 @@
   .desk {
     position: absolute; inset: 0;
     background:
-      radial-gradient(120% 90% at 15% 110%, #8f7cff 0%, transparent 55%),
-      radial-gradient(90% 80% at 95% 0%, #c9d4ff 0%, transparent 60%),
-      linear-gradient(160deg, #aab8ff, #6a5cf0 65%, #2e2a7a);
+      radial-gradient(120% 90% at 15% 110%, #ffd84d 0%, transparent 55%),
+      radial-gradient(90% 80% at 95% 0%, #fff6cf 0%, transparent 60%),
+      linear-gradient(160deg, #ffeaa0, #ffc400 60%, #3b3220);
     transition: transform .55s cubic-bezier(.3,.9,.3,1), border-radius .3s ease;
     border-radius: 0;
   }
@@ -112,23 +113,23 @@
   .menubar {
     height: var(--bar); display: flex; align-items: center; gap: 14px; padding: 0 12px;
     background: rgba(255,255,255,.38); backdrop-filter: blur(10px);
-    font: 600 11px/1 -apple-system, system-ui, sans-serif; color: #15163a;
+    font: 600 11px/1 -apple-system, system-ui, sans-serif; color: #2a2410;
   }
   .menubar .apple { font-size: 13px; }
   .menubar .right { margin-left: auto; display: flex; gap: 12px; align-items: center; }
-  .menubar .dot { width: 12px; height: 8px; border-radius: 2px; background: rgba(20,22,60,.55); }
+  .menubar .dot { width: 12px; height: 8px; border-radius: 2px; background: rgba(42,36,16,.55); }
   .window {
     position: absolute; left: 8%; top: 22%; width: 56%; height: 58%;
-    background: rgba(255,255,255,.86); border-radius: 10px; box-shadow: 0 18px 40px rgba(20,16,80,.3);
+    background: rgba(255,255,255,.86); border-radius: 10px; box-shadow: 0 18px 40px rgba(60,45,0,.28);
     padding: 12px;
   }
   .window .lights { display: flex; gap: 6px; margin-bottom: 14px; }
   .window .lights span { width: 9px; height: 9px; border-radius: 50%; background: #ff5f57; }
   .window .lights span:nth-child(2) { background: #febc2e; }
   .window .lights span:nth-child(3) { background: #28c840; }
-  .window .ln { height: 8px; border-radius: 4px; background: #e4e6f2; margin: 8px 0; }
+  .window .ln { height: 8px; border-radius: 4px; background: #efe9d8; margin: 8px 0; }
   .window .ln.s { width: 60%; }
-  .window2 { left: 52%; top: 40%; width: 40%; height: 46%; background: rgba(18,18,40,.82); }
+  .window2 { left: 52%; top: 40%; width: 40%; height: 46%; background: rgba(24,22,16,.85); }
   .window2 .ln { background: rgba(255,255,255,.14); }
 
   /* Notch, band and drawer */
@@ -176,20 +177,20 @@
   }
   .toggle .sw { width: 28px; height: 16px; border-radius: 999px; background: #d9d9d9; position: relative; transition: background .2s; }
   .toggle .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
-  .toggle[aria-pressed="true"] .sw { background: var(--accent); }
+  .toggle[aria-pressed="true"] .sw { background: var(--accent); box-shadow: inset 0 0 0 1px #e0ac00; }
   .toggle[aria-pressed="true"] .sw::after { transform: translateX(12px); }
   .hint { text-align: center; color: var(--muted); font-size: 13px; margin-top: 14px; }
 
   /* ---------- Features ---------- */
   section { padding: 72px 0; }
-  .eyebrow { display: inline-block; font: 600 13px/1 "Geist", system-ui, sans-serif; color: var(--accent); background: var(--accent-soft); padding: 7px 12px; border-radius: 999px; }
+  .eyebrow { display: inline-block; font: 600 13px/1 "Geist", system-ui, sans-serif; color: var(--accent-ink); background: var(--accent-soft); padding: 7px 12px; border-radius: 999px; }
   h2 { font: 800 clamp(32px, 4vw, 48px)/1.05 var(--display); letter-spacing: -1.8px; margin: 12px 0 14px; }
   .lead { color: var(--muted); font-size: 18px; max-width: 560px; margin: 0; }
   .center { text-align: center; }
   .center .lead { margin: 0 auto; }
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
   .card {
-    background: var(--card); border-radius: var(--radius); padding: 26px; border: 1px solid #e8e9f2;
+    background: var(--card); border-radius: var(--radius); padding: 26px; border: 1px solid #efeadc;
     display: flex; flex-direction: column; gap: 10px; min-height: 250px;
   }
   .card.wide { grid-column: span 2; }
@@ -198,18 +199,18 @@
   .art { flex: 1; display: grid; place-items: center; min-height: 110px; }
 
   /* small illustrations */
-  .mini-bar { width: 100%; max-width: 300px; height: 22px; border-radius: 8px; background: #e6e8f3; position: relative; overflow: hidden; }
+  .mini-bar { width: 100%; max-width: 300px; height: 22px; border-radius: 8px; background: #f1ecdc; position: relative; overflow: hidden; }
   .mini-bar .n { position: absolute; left: 50%; top: 0; height: 100%; width: 70px; margin-left: -35px; background: #111; border-radius: 0 0 8px 8px; }
   .mini-bar.hide .n { width: 150px; margin-left: -75px; }
   .stack { width: 100%; max-width: 300px; }
   .stack .strip { height: 14px; background: #111; border-radius: 8px 8px 0 0; }
-  .stack .mb { height: 18px; background: #e6e8f3; border-radius: 6px 6px 0 0; display: flex; gap: 6px; align-items: center; padding: 0 8px; }
-  .stack .mb span { width: 18px; height: 5px; border-radius: 3px; background: #b4b8d6; }
-  .stack .win { height: 46px; background: #f7f8fc; border: 1px dashed #d5d8ea; border-top: 0; }
+  .stack .mb { height: 18px; background: #f1ecdc; border-radius: 6px 6px 0 0; display: flex; gap: 6px; align-items: center; padding: 0 8px; }
+  .stack .mb span { width: 18px; height: 5px; border-radius: 3px; background: #d6cca8; }
+  .stack .win { height: 46px; background: #fdfbf5; border: 1px dashed #e8dfc4; border-top: 0; }
   .mini-drawer { background: #111; color: #fff; border-radius: 0 0 18px 18px; padding: 14px 20px; display: flex; gap: 28px; align-items: center; }
   .mini-drawer .t { font: 800 26px/1 var(--display); }
   .mini-drawer .d { font-size: 11px; color: #9b9b9b; }
-  .corners-art { width: 150px; height: 90px; background: #e6e8f3; border-radius: 22px 22px 6px 6px; border-top: 10px solid #111; }
+  .corners-art { width: 150px; height: 90px; background: #f1ecdc; border-radius: 22px 22px 6px 6px; border-top: 10px solid #111; }
   .keycap {
     font: 800 28px/1 var(--display); width: 74px; height: 74px; border-radius: 18px; display: grid; place-items: center;
     background: linear-gradient(#fff, #f2f2f2); border: 1px solid #e3e3e3; box-shadow: 0 6px 0 #dcdcdc, 0 10px 18px rgba(0,0,0,.08);
@@ -217,7 +218,7 @@
   .big-num { font: 800 54px/1 var(--display); letter-spacing: -2px; }
   .big-num small { font-size: 18px; color: var(--muted); letter-spacing: 0; }
   .lock { width: 64px; height: 64px; border-radius: 20px; background: var(--accent-soft); display: grid; place-items: center; }
-  .lock svg { width: 30px; height: 30px; color: var(--accent); }
+  .lock svg { width: 30px; height: 30px; color: var(--accent-ink); }
 
   /* ---------- Open source band ---------- */
   .oss { background: var(--ink); color: #fff; border-radius: 32px; padding: 56px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
@@ -226,11 +227,12 @@
   .term { background: #111; border: 1px solid #2a2a2a; border-radius: 18px; padding: 20px; font: 500 14px/1.7 ui-monospace, "SF Mono", Menlo, monospace; color: #d4d4d4; overflow-x: auto; }
   .term .c { color: #6b6b6b; }
   .term .p { color: var(--accent); }
+  mark { background: var(--accent); color: inherit; padding: 0 .12em; border-radius: .12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   .oss .btn.secondary { background: transparent; color: #fff; border-color: #3a3a3a; margin-top: 26px; }
 
   /* ---------- FAQ ---------- */
   .faq { max-width: 760px; margin: 40px auto 0; display: grid; gap: 12px; }
-  details { background: var(--card); border-radius: 18px; border: 1px solid #e8e9f2; padding: 18px 22px; }
+  details { background: var(--card); border-radius: 18px; border: 1px solid #efeadc; padding: 18px 22px; }
   summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
   summary::after { content: "+"; font: 800 20px/1 var(--display); color: var(--muted); }
   details[open] summary::after { content: "–"; }
@@ -294,7 +296,7 @@
       <div class="app-icon">
         <img src="assets/icon.png" alt="Brow app icon" width="112" height="112">
       </div>
-      <h1>Hide the notch.<br>Keep the time.</h1>
+      <h1>Hide the notch.<br><mark>Keep the time.</mark></h1>
       <p class="sub">A tiny menu bar app that blacks out the MacBook notch and tucks a clock right under it.</p>
       <div class="cta">
         <a class="btn primary" href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.zip">

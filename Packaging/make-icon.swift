@@ -23,8 +23,8 @@ let image = NSImage(size: NSSize(width: size, height: size), flipped: true) { _ 
     NSGraphicsContext.current?.saveGraphicsState()
     tilePath.addClip()
     NSGradient(colors: [
-        NSColor(red: 0.80, green: 0.84, blue: 1.00, alpha: 1),
-        NSColor(red: 0.36, green: 0.36, blue: 0.94, alpha: 1),
+        NSColor(red: 1.00, green: 0.92, blue: 0.55, alpha: 1),
+        NSColor(red: 1.00, green: 0.75, blue: 0.00, alpha: 1),
     ])?.draw(in: tile, angle: 90)
 
     // The notch drawer hanging from the top edge of the tile.
