@@ -6,14 +6,14 @@
 A tiny, free, open-source menu bar app that blacks out the notch, can push your menu bar below it, and tucks a clock underneath.</p>
 
 <p align="center">
-  <a href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.zip"><b>Download for Mac</b></a> ·
+  <a href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.dmg"><b>Download for Mac</b></a> ·
   <a href="https://stephenlovino.github.io/Brow/">Website</a> ·
   <a href="LICENSE">MIT License</a>
 </p>
 
 ## Install
 
-Download `Brow.zip` from the [latest release](https://github.com/StephenLovino/Brow/releases/latest), unzip it, and drag **Brow.app** to Applications. It's signed with a Developer ID and notarized by Apple, so it opens like any other app.
+Download `Brow.dmg` from the [latest release](https://github.com/StephenLovino/Brow/releases/latest), open it, and drag **Brow.app** to Applications. It's signed with a Developer ID and notarized by Apple, so it opens like any other app.
 
 Requires macOS 14 Sonoma or later, on Apple Silicon or Intel. Brow runs in the menu bar only, with no Dock icon.
 
@@ -37,7 +37,7 @@ swift run
 
 ## Releasing
 
-`Packaging/release.sh` builds a universal `Brow.app`, signs it with your Developer ID (hardened runtime), notarizes it, staples the ticket, and writes `dist/Brow.zip`.
+`Packaging/release.sh` builds a universal `Brow.app`, signs it with your Developer ID (hardened runtime), notarizes and staples it, then packages it in `dist/Brow.dmg`, which is itself signed, notarized and stapled.
 
 One-time setup, which stores an [app-specific password](https://support.apple.com/102654) in your keychain:
 
