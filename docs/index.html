@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brow · Hide the MacBook notch</title>
+<meta name="description" content="Brow is a free, open-source menu bar app that hides the MacBook notch, pushes your menu bar below it, and tucks a clock underneath.">
+<meta property="og:title" content="Brow · Hide the MacBook notch">
+<meta property="og:description" content="Free and open source. Black out the notch, push everything below it, and keep a clock under it.">
+<meta property="og:image" content="assets/icon.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@800;900&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #e7e7e7;
+    --accent: #f59a5c;
+    --accent-soft: #fde9d7;
+    --green: #22c55e;
+    --radius: 24px;
+    --rounded: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 500 16px/1.55 "Inter", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    padding: 14px 0;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(1.4) blur(14px);
+  }
+  .topbar .wrap { display: flex; align-items: center; gap: 10px; }
+  .logo { display: flex; align-items: center; gap: 8px; font: 900 22px/1 var(--rounded); letter-spacing: -0.5px; margin-right: auto; }
+  .logo img { width: 28px; height: 28px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 38px; padding: 0 16px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line);
+    font-size: 14px; color: #3d3d3d; white-space: nowrap;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .pill:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+  .pill.dark { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .pill svg { width: 16px; height: 16px; }
+
+  /* ---------- Hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: center; padding: 36px 0 72px; }
+  .hero-copy { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+  .badge i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px #22c55e22; }
+  .app-icon { position: relative; margin: 26px 0 18px; }
+  .app-icon img { width: 112px; height: 112px; display: block; transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
+  .app-icon img:hover { transform: rotate(-6deg) scale(1.06); }
+  .scribble { font: 600 22px/1 "Caveat", cursive; color: #8a8a8a; display: inline-flex; align-items: center; gap: 6px; }
+  .app-icon .scribble { position: absolute; left: 50%; bottom: -30px; transform: translateX(-30%) rotate(-4deg); white-space: nowrap; }
+  h1 {
+    font: 900 clamp(40px, 5.4vw, 60px)/1.02 var(--rounded);
+    letter-spacing: -2px; margin: 36px 0 14px;
+  }
+  .sub { color: var(--muted); font-size: 18px; margin: 0 0 28px; max-width: 380px; }
+  .cta { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    height: 54px; padding: 0 28px; border-radius: 999px; font-weight: 600; font-size: 16px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.primary { background: var(--ink); color: #fff; box-shadow: 0 10px 24px rgba(0,0,0,.18); min-width: 240px; }
+  .btn.secondary { background: var(--card); border: 1px solid var(--line); color: var(--ink); min-width: 240px; }
+  .btn svg { width: 18px; height: 18px; }
+  .fine { color: #9a9a9a; font-size: 13px; margin-top: 4px; }
+
+  /* ---------- Laptop demo ---------- */
+  .demo { position: relative; }
+  .laptop { width: 100%; max-width: 680px; margin: 0 auto; padding: 0 4%; }
+  .lid {
+    background: #0b0b0b; border-radius: 22px 22px 6px 6px; padding: 12px 12px 14px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,.35);
+  }
+  .screen {
+    position: relative; aspect-ratio: 16 / 10.4; overflow: hidden;
+    border-radius: 12px 12px 2px 2px; background: #000;
+    --bar: 26px;
+  }
+  .desk {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 90% at 20% 110%, #f7b27a 0%, transparent 55%),
+      radial-gradient(90% 80% at 90% 0%, #fde3c4 0%, transparent 60%),
+      linear-gradient(160deg, #fbd6b0, #f08e5a 70%, #c95f38);
+    transition: transform .55s cubic-bezier(.3,.9,.3,1), border-radius .3s ease;
+    border-radius: 0;
+  }
+  .screen.pushed .desk { transform: translateY(var(--bar)); }
+  .screen.pushed.corners .desk { border-radius: 12px 12px 0 0; }
+  .menubar {
+    height: var(--bar); display: flex; align-items: center; gap: 14px; padding: 0 12px;
+    background: rgba(255,255,255,.38); backdrop-filter: blur(10px);
+    font: 600 11px/1 -apple-system, system-ui, sans-serif; color: #2a1a10;
+  }
+  .menubar .apple { font-size: 13px; }
+  .menubar .right { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .menubar .dot { width: 12px; height: 8px; border-radius: 2px; background: rgba(40,20,10,.55); }
+  .window {
+    position: absolute; left: 8%; top: 22%; width: 56%; height: 58%;
+    background: rgba(255,255,255,.86); border-radius: 10px; box-shadow: 0 18px 40px rgba(80,30,0,.25);
+    padding: 12px;
+  }
+  .window .lights { display: flex; gap: 6px; margin-bottom: 14px; }
+  .window .lights span { width: 9px; height: 9px; border-radius: 50%; background: #ff5f57; }
+  .window .lights span:nth-child(2) { background: #febc2e; }
+  .window .lights span:nth-child(3) { background: #28c840; }
+  .window .ln { height: 8px; border-radius: 4px; background: #e9e1da; margin: 8px 0; }
+  .window .ln.s { width: 60%; }
+  .window2 { left: 52%; top: 40%; width: 40%; height: 46%; background: rgba(30,20,15,.82); }
+  .window2 .ln { background: rgba(255,255,255,.14); }
+
+  /* Notch, band and drawer */
+  .notch-zone { position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; flex-direction: column; align-items: center; }
+  .band {
+    height: var(--bar); width: 150px; background: #000;
+    border-radius: 0 0 10px 10px;
+    transition: width .45s cubic-bezier(.3,.9,.3,1), border-radius .2s ease;
+    position: relative;
+  }
+  .band::after { /* camera */
+    content: ""; position: absolute; left: 50%; top: 9px; width: 7px; height: 7px; margin-left: -3.5px;
+    border-radius: 50%; background: #1d2433; box-shadow: inset 0 0 2px #4b5d80;
+  }
+  .screen.hidden-notch .band { width: 250px; }
+  .screen.pushed .band { width: 2000px; border-radius: 0; }
+  .drawer {
+    width: 250px; height: 0; overflow: hidden; background: #000; color: #fff;
+    border-radius: 0 0 18px 18px; margin-top: -1px;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
+    transition: height .4s cubic-bezier(.3,1.3,.5,1);
+  }
+  .screen.open .drawer { height: 58px; }
+  .screen.open .band { border-radius: 0; }
+  .drawer .time { font: 800 22px/1 var(--rounded); letter-spacing: -.5px; }
+  .drawer .date { font-size: 10px; color: #9b9b9b; margin-top: 3px; }
+  .drawer .batt { font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+  .drawer .batt b { width: 20px; height: 10px; border: 1.5px solid #fff; border-radius: 3px; position: relative; display: inline-block; }
+  .drawer .batt b::after { content: ""; position: absolute; inset: 1.5px; right: 5px; background: #fff; border-radius: 1px; }
+  .corner { position: absolute; top: var(--bar); width: 14px; height: 14px; opacity: 0; transition: opacity .3s ease; z-index: 4; pointer-events: none; }
+  .corner.l { left: 0; background: radial-gradient(circle at 100% 100%, transparent 13.5px, #000 14px); }
+  .corner.r { right: 0; background: radial-gradient(circle at 0 100%, transparent 13.5px, #000 14px); }
+  .screen.pushed.corners .corner { opacity: 1; }
+  .base {
+    height: 16px; margin: 0 -5%; border-radius: 0 0 18px 18px;
+    background: linear-gradient(#d9d9d9, #b8b8b8); position: relative;
+  }
+  .base::before { content: ""; position: absolute; left: 50%; top: 0; width: 16%; height: 6px; margin-left: -8%; background: #a8a8a8; border-radius: 0 0 8px 8px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 26px; }
+  .toggle {
+    font: inherit; font-size: 14px; cursor: pointer;
+    height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: #3d3d3d; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .toggle .sw { width: 28px; height: 16px; border-radius: 999px; background: #d9d9d9; position: relative; transition: background .2s; }
+  .toggle .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .toggle[aria-pressed="true"] .sw { background: var(--ink); }
+  .toggle[aria-pressed="true"] .sw::after { transform: translateX(12px); }
+  .demo .scribble { position: absolute; left: 4%; bottom: -46px; transform: rotate(-3deg); }
+
+  /* ---------- Features ---------- */
+  section { padding: 72px 0; }
+  .eyebrow { font: 800 14px/1 var(--rounded); color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; }
+  h2 { font: 900 clamp(32px, 4vw, 46px)/1.05 var(--rounded); letter-spacing: -1.5px; margin: 12px 0 14px; }
+  .lead { color: var(--muted); font-size: 18px; max-width: 560px; margin: 0; }
+  .center { text-align: center; }
+  .center .lead { margin: 0 auto; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 44px; }
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 26px; border: 1px solid #eeeeee;
+    display: flex; flex-direction: column; gap: 10px; min-height: 250px;
+  }
+  .card.wide { grid-column: span 2; }
+  .card h3 { margin: auto 0 0; font: 800 20px/1.2 var(--rounded); letter-spacing: -.3px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .art { flex: 1; display: grid; place-items: center; min-height: 110px; }
+
+  /* small illustrations */
+  .mini-bar { width: 100%; max-width: 300px; height: 22px; border-radius: 8px; background: #f0e7df; position: relative; overflow: hidden; }
+  .mini-bar .n { position: absolute; left: 50%; top: 0; height: 100%; width: 70px; margin-left: -35px; background: #111; border-radius: 0 0 8px 8px; }
+  .mini-bar.hide .n { width: 150px; margin-left: -75px; }
+  .stack { width: 100%; max-width: 300px; }
+  .stack .strip { height: 14px; background: #111; border-radius: 8px 8px 0 0; }
+  .stack .mb { height: 18px; background: #f0e7df; border-radius: 6px 6px 0 0; display: flex; gap: 6px; align-items: center; padding: 0 8px; }
+  .stack .mb span { width: 18px; height: 5px; border-radius: 3px; background: #c9b8a9; }
+  .stack .win { height: 46px; background: #faf6f2; border: 1px dashed #e4d6ca; border-top: 0; }
+  .mini-drawer { background: #111; color: #fff; border-radius: 0 0 18px 18px; padding: 14px 20px; display: flex; gap: 28px; align-items: center; }
+  .mini-drawer .t { font: 800 26px/1 var(--rounded); }
+  .mini-drawer .d { font-size: 11px; color: #9b9b9b; }
+  .corners-art { width: 150px; height: 90px; background: #f0e7df; border-radius: 22px 22px 6px 6px; border-top: 10px solid #111; }
+  .keycap {
+    font: 800 28px/1 var(--rounded); width: 74px; height: 74px; border-radius: 18px; display: grid; place-items: center;
+    background: linear-gradient(#fff, #f2f2f2); border: 1px solid #e3e3e3; box-shadow: 0 6px 0 #dcdcdc, 0 10px 18px rgba(0,0,0,.08);
+  }
+  .big-num { font: 900 54px/1 var(--rounded); letter-spacing: -2px; }
+  .big-num small { font-size: 18px; color: var(--muted); letter-spacing: 0; }
+  .lock { width: 64px; height: 64px; border-radius: 20px; background: var(--accent-soft); display: grid; place-items: center; }
+  .lock svg { width: 30px; height: 30px; color: var(--accent); }
+
+  /* ---------- Open source band ---------- */
+  .oss { background: var(--ink); color: #fff; border-radius: 32px; padding: 56px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; }
+  .oss h2 { color: #fff; margin-top: 0; }
+  .oss .lead { color: #b5b5b5; }
+  .term { background: #111; border: 1px solid #2a2a2a; border-radius: 18px; padding: 20px; font: 500 14px/1.7 ui-monospace, "SF Mono", Menlo, monospace; color: #d4d4d4; overflow-x: auto; }
+  .term .c { color: #6b6b6b; }
+  .term .p { color: var(--accent); }
+  .oss .btn.secondary { background: transparent; color: #fff; border-color: #3a3a3a; margin-top: 26px; }
+
+  /* ---------- FAQ ---------- */
+  .faq { max-width: 760px; margin: 40px auto 0; display: grid; gap: 12px; }
+  details { background: var(--card); border-radius: 18px; border: 1px solid #eeeeee; padding: 18px 22px; }
+  summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  summary::after { content: "+"; font: 800 20px/1 var(--rounded); color: var(--muted); }
+  details[open] summary::after { content: "–"; }
+  details p { color: var(--muted); margin: 12px 0 0; }
+
+  /* ---------- Final CTA + footer ---------- */
+  .final { text-align: center; padding: 96px 0 72px; }
+  .final .cta { margin-top: 30px; }
+  footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: #8a8a8a; font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+  footer .links { margin-left: auto; display: flex; gap: 18px; }
+  footer a:hover { color: var(--ink); }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 920px) {
+    .hero { grid-template-columns: 1fr; gap: 64px; padding-top: 12px; }
+    .hero-copy { order: -1; }
+    .grid { grid-template-columns: 1fr 1fr; }
+    .card.wide { grid-column: span 2; }
+    .oss { grid-template-columns: 1fr; padding: 36px 26px; }
+    .hide-sm { display: none; }
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 0 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .card.wide { grid-column: auto; }
+    .topbar .pill:not(.dark) { display: none; }
+    .screen { --bar: 18px; }
+    .band { width: 96px; }
+    .screen.hidden-notch .band, .drawer { width: 170px; }
+    .screen.open .drawer { height: 44px; }
+    .drawer .time { font-size: 16px; }
+    .drawer .date { display: none; }
+    .menubar { gap: 8px; font-size: 8px; }
+    .menubar .hide-xs { display: none; }
+    .demo .scribble { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="#"><img src="assets/icon.png" alt="">brow</a>
+    <a class="pill hide-sm" href="#features">Features</a>
+    <a class="pill" href="https://github.com/StephenLovino/Brow">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.71 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      Star on GitHub
+    </a>
+    <a class="pill dark" href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.zip">Download</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="demo">
+      <div class="laptop">
+        <div class="lid">
+          <div class="screen hidden-notch corners" id="screen">
+            <div class="desk">
+              <div class="menubar">
+                <span class="apple"></span><b>Finder</b><span>File</span><span>Edit</span><span class="hide-xs">View</span><span class="hide-xs">Go</span>
+                <span class="right"><span class="dot"></span><span class="dot hide-xs"></span><span class="dot hide-xs"></span><span id="mb-time">Mon 9:41</span></span>
+              </div>
+              <div class="window"><div class="lights"><span></span><span></span><span></span></div><div class="ln"></div><div class="ln s"></div><div class="ln"></div><div class="ln s"></div></div>
+              <div class="window window2"><div class="lights"><span></span><span></span><span></span></div><div class="ln"></div><div class="ln s"></div><div class="ln"></div></div>
+            </div>
+            <div class="corner l"></div><div class="corner r"></div>
+            <div class="notch-zone" id="notch">
+              <div class="band"></div>
+              <div class="drawer">
+                <div><div class="time" id="d-time">9:41</div><div class="date" id="d-date">Monday, November 2</div></div>
+                <div class="batt">84% <b></b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="base"></div>
+      </div>
+      <div class="controls" role="group" aria-label="Try Brow's settings">
+        <button class="toggle" data-class="hidden-notch" aria-pressed="true"><span class="sw"></span>Hide notch</button>
+        <button class="toggle" data-class="pushed" aria-pressed="false"><span class="sw"></span>Push below notch</button>
+        <button class="toggle" data-class="corners" aria-pressed="true"><span class="sw"></span>Rounded corners</button>
+        <button class="toggle" data-class="open" aria-pressed="false"><span class="sw"></span>Widget drawer</button>
+      </div>
+      <span class="scribble">↖ hover the notch, or flip these</span>
+    </div>
+
+    <div class="hero-copy">
+      <span class="badge"><i></i>Free &amp; open source</span>
+      <div class="app-icon">
+        <img src="assets/icon.png" alt="Brow app icon" width="112" height="112">
+        <span class="scribble">↙ that's the notch, tamed</span>
+      </div>
+      <h1>Hide the notch.<br>Keep the time.</h1>
+      <p class="sub">A tiny menu bar app that blacks out the MacBook notch and tucks a clock right under it.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.zip">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.77-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.28-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.98.72 1.23-.02 2.01-1.12 2.76-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.66ZM14.1 5.86c.63-.77 1.06-1.83.94-2.89-.91.04-2.02.61-2.67 1.37-.58.67-1.1 1.76-.96 2.8 1.02.08 2.06-.52 2.69-1.28Z"/></svg>
+          Download for Mac
+        </a>
+        <a class="btn secondary" href="https://github.com/StephenLovino/Brow">View the source</a>
+        <span class="fine">Free · MIT licensed · Notarized by Apple · macOS 14+</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="center">
+        <span class="eyebrow">What it does</span>
+        <h2>Small app. Big forehead.</h2>
+        <p class="lead">Brow lives in your menu bar and does a few things really well. Everything is click-through, so it never gets in your way.</p>
+      </div>
+      <div class="grid">
+        <div class="card wide">
+          <div class="art">
+            <div class="stack">
+              <div class="strip"></div>
+              <div class="mb"><span></span><span></span><span></span></div>
+              <div class="win"></div>
+            </div>
+          </div>
+          <h3>Push everything below the notch</h3>
+          <p>One toggle moves the real menu bar and every window below the camera. macOS does the layout, so maximized and full-screen apps fit too. Quit Brow and your resolution comes right back.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="mini-bar hide"><div class="n"></div></div></div>
+          <h3>Notch, gone</h3>
+          <p>A black band blends into the camera cutout, around the notch or across the full width.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="mini-drawer"><div><div class="t">9:41</div><div class="d">Monday, November 2</div></div><b>84%</b></div></div>
+          <h3>A drawer under the notch</h3>
+          <p>Hover the notch to drop down the time, date and battery. Or keep it open.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="corners-art"></div></div>
+          <h3>Rounded corners</h3>
+          <p>Softens the square top corners you get after pushing things down. Four sizes, or off.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="keycap">⌥</div></div>
+          <h3>Peek with Option</h3>
+          <p>Hold ⌥ to fade the band away and see what's underneath.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div></div>
+          <h3>Private by design</h3>
+          <p>No network, no analytics, no account. Brow never leaves your Mac.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="big-num">~1<small> MB</small></div></div>
+          <h3>Featherweight</h3>
+          <p>Native Swift and SwiftUI. Universal for Apple Silicon and Intel.</p>
+        </div>
+        <div class="card">
+          <div class="art"><div class="big-num">$0</div></div>
+          <h3>Free forever</h3>
+          <p>No trial, no upgrade nag, no subscription. Just a download.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="oss">
+        <div>
+          <span class="eyebrow">Open source</span>
+          <h2>Read every line. Fork it. Ship it.</h2>
+          <p class="lead">Brow is MIT licensed and written from scratch. Build it yourself in a minute, or open a pull request with the widget you want next.</p>
+          <a class="btn secondary" href="https://github.com/StephenLovino/Brow">Browse the code →</a>
+        </div>
+        <div class="term"><span class="c"># build and run from source</span><br><span class="p">$</span> git clone https://github.com/StephenLovino/Brow<br><span class="p">$</span> cd Brow<br><span class="p">$</span> swift run</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="center">
+        <span class="eyebrow">Questions</span>
+        <h2>Good to know</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>How does "push below the notch" work?</summary>
+          <p>Notched MacBooks also support a display mode that's a little shorter and stops just under the camera. Brow switches to it while it runs, so macOS itself places the menu bar and windows below the notch. It uses a public macOS API, and your normal resolution returns when Brow quits.</p>
+        </details>
+        <details>
+          <summary>Will it block clicks on my menu bar?</summary>
+          <p>No. Everything Brow draws is click-through. In full-width mode you can still click menu bar items under the band, or hold ⌥ to see them.</p>
+        </details>
+        <details>
+          <summary>Does it work on Macs without a notch?</summary>
+          <p>Yes. The band and widget drawer sit at the top center of your main display. The push-below option only appears on notched MacBooks.</p>
+        </details>
+        <details>
+          <summary>Is it safe to open?</summary>
+          <p>Brow is signed with a Developer ID and notarized by Apple, so it opens like any other Mac app. You can also read and build the source yourself.</p>
+        </details>
+        <details>
+          <summary>What do I need?</summary>
+          <p>macOS 14 Sonoma or later, on Apple Silicon or Intel.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2>Give your notch<br>the day off.</h2>
+      <p class="lead" style="margin: 0 auto">Free, open source, and about a megabyte.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/StephenLovino/Brow/releases/latest/download/Brow.zip">Download for Mac</a>
+        <span class="fine">Requires macOS 14 or later</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Brow · MIT License</span>
+    <div class="links">
+      <a href="https://github.com/StephenLovino/Brow">GitHub</a>
+      <a href="https://github.com/StephenLovino/Brow/releases">Releases</a>
+      <a href="https://github.com/StephenLovino/Brow/issues">Report a bug</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const screen = document.getElementById("screen");
+  const notch = document.getElementById("notch");
+  const drawerToggle = document.querySelector('[data-class="open"]');
+
+  function setClass(name, on) {
+    screen.classList.toggle(name, on);
+    const button = document.querySelector(`[data-class="${name}"]`);
+    if (button) button.setAttribute("aria-pressed", String(on));
+  }
+
+  // Pushing below the notch implies the notch is hidden; showing it again un-pushes.
+  document.querySelectorAll(".toggle").forEach(button => {
+    button.addEventListener("click", () => {
+      const name = button.dataset.class;
+      const on = button.getAttribute("aria-pressed") !== "true";
+      setClass(name, on);
+      if (name === "pushed" && on) setClass("hidden-notch", true);
+      if (name === "hidden-notch" && !on) setClass("pushed", false);
+    });
+  });
+
+  // Hovering the notch peeks the drawer, unless it's pinned open with the toggle.
+  notch.addEventListener("mouseenter", () => screen.classList.add("open"));
+  notch.addEventListener("mouseleave", () => {
+    if (drawerToggle.getAttribute("aria-pressed") !== "true") screen.classList.remove("open");
+  });
+
+  function tick() {
+    const now = new Date();
+    const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }).replace(/\s?[AP]M/i, "");
+    document.getElementById("d-time").textContent = time;
+    document.getElementById("d-date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    document.getElementById("mb-time").textContent = now.toLocaleDateString([], { weekday: "short" }) + " " + time;
+  }
+  tick();
+  setInterval(tick, 15000);
+
+  // Drop the drawer once on load so first-time visitors see what it does.
+  setTimeout(() => setClass("open", true), 900);
+  setTimeout(() => { if (!notch.matches(":hover")) setClass("open", false); }, 3200);
+</script>
+</body>
+</html>
