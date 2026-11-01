@@ -12,6 +12,9 @@
 #   BUILD           build number (default: commit count)
 #   SIGN_IDENTITY   codesign identity name or SHA-1 (default: first "Developer ID Application" identity)
 #   NOTARY_PROFILE  notarytool keychain profile (default brow-notary)
+#   APPLE_ID_USER, APPLE_APP_PASSWORD
+#                   Apple ID and app-specific password; used instead of the profile when both are set.
+#                   The team ID is read from the signed app.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -64,8 +67,15 @@ if [[ "${SKIP_NOTARIZE:-0}" == "1" ]]; then
     exit 0
 fi
 
-echo "==> Notarizing (profile: $NOTARY_PROFILE)"
-xcrun notarytool submit "$ZIP" --keychain-profile "$NOTARY_PROFILE" --wait
+if [[ -n "${APPLE_ID_USER:-}" && -n "${APPLE_APP_PASSWORD:-}" ]]; then
+    TEAM_ID="$(codesign -dv "$APP" 2>&1 | sed -n 's/^TeamIdentifier=//p')"
+    echo "==> Notarizing (Apple ID from environment, team $TEAM_ID)"
+    NOTARY_AUTH=(--apple-id "$APPLE_ID_USER" --password "$APPLE_APP_PASSWORD" --team-id "$TEAM_ID")
+else
+    echo "==> Notarizing (profile: $NOTARY_PROFILE)"
+    NOTARY_AUTH=(--keychain-profile "$NOTARY_PROFILE")
+fi
+xcrun notarytool submit "$ZIP" "${NOTARY_AUTH[@]}" --wait
 
 echo "==> Stapling"
 xcrun stapler staple "$APP"
