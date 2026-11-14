@@ -29,6 +29,35 @@ struct DrawerView: View {
     }
 }
 
+/// The time to the left of the notch and the battery to the right, drawn on the band itself.
+struct BandWidgets: View {
+    let notchWidth: CGFloat
+    @StateObject private var battery = BatteryMonitor()
+
+    var body: some View {
+        HStack(spacing: 0) {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                Text(context.date, format: .dateTime.hour().minute())
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.trailing, 14)
+
+            Color.clear.frame(width: notchWidth)
+
+            Group {
+                if let level = battery.level {
+                    BatteryBadge(level: level, charging: battery.isCharging)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 14)
+        }
+        .foregroundStyle(.white)
+    }
+}
+
 struct BatteryBadge: View {
     let level: Int
     let charging: Bool

@@ -12,6 +12,8 @@ final class OverlayState: ObservableObject {
 final class OverlayController {
     /// Extra black on each side of the notch in `.notch` mode, so its edges disappear.
     static let earWidth: CGFloat = 70
+    /// Wider ears in `.notch` mode, to fit the time and battery beside the notch.
+    static let widgetEarWidth: CGFloat = 104
     static let drawerSize = CGSize(width: 340, height: 72)
 
     private let preferences: Preferences
@@ -72,7 +74,9 @@ final class OverlayController {
             drawerSize: Self.drawerSize,
             roundedBand: preferences.bandMode == .notch,
             notchOffset: geo.centerX - geo.screenFrame.midX,
-            cornerRadius: cornerRadius
+            cornerRadius: cornerRadius,
+            notchWidth: geo.effectiveNotchWidth,
+            widgetsInBand: widgetsInBand
         ))
         hostingView.sizingOptions = []
         window.contentView = hostingView
@@ -80,13 +84,27 @@ final class OverlayController {
         window.orderFrontRegardless()
         self.window = window
 
-        state.drawerOpen = preferences.drawerMode == .always
+        state.drawerOpen = drawerMode == .always
+    }
+
+    /// Widgets go in the band only while there is a band beside the notch to draw on.
+    private var widgetsInBand: Bool {
+        preferences.drawerMode == .inBand && !displayMode.isActive
+    }
+
+    /// The drawer behavior in effect: "in the band" becomes "on hover" while pushed below the notch.
+    private var drawerMode: DrawerMode {
+        preferences.drawerMode == .inBand && displayMode.isActive ? .onHover : preferences.drawerMode
+    }
+
+    private var earWidth: CGFloat {
+        widgetsInBand ? Self.widgetEarWidth : Self.earWidth
     }
 
     private func bandWidth(for geo: NotchGeometry) -> CGFloat {
         switch preferences.bandMode {
         case .notch:
-            return geo.effectiveNotchWidth + Self.earWidth * 2
+            return geo.effectiveNotchWidth + earWidth * 2
         case .fullWidth:
             // Centered on the notch, so it must reach the farther screen edge on both sides.
             let reach = max(geo.centerX - geo.screenFrame.minX, geo.screenFrame.maxX - geo.centerX)
@@ -114,7 +132,7 @@ final class OverlayController {
             state.bandHidden = optionHeld
         }
 
-        guard preferences.drawerMode == .onHover, let geo = geometry else { return }
+        guard drawerMode == .onHover, let geo = geometry else { return }
 
         if hoverZone(for: geo).contains(NSEvent.mouseLocation) {
             pendingClose?.cancel()
@@ -135,7 +153,7 @@ final class OverlayController {
     private func hoverZone(for geo: NotchGeometry) -> CGRect {
         // Only the area around the notch opens the drawer, even in full-width mode,
         // so moving along the menu bar doesn't keep popping it open.
-        let width = geo.effectiveNotchWidth + Self.earWidth * 2
+        let width = geo.effectiveNotchWidth + earWidth * 2
         let top = geo.screenFrame.maxY + 1 // the cursor can sit on the very top edge
         var zone = CGRect(x: geo.centerX - width / 2, y: top - geo.height - 1, width: width, height: geo.height + 1)
 

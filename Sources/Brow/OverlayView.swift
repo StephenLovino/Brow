@@ -10,6 +10,9 @@ struct OverlayView: View {
     let notchOffset: CGFloat
     /// Zero leaves the screen's top corners alone.
     let cornerRadius: CGFloat
+    let notchWidth: CGFloat
+    /// Draw the time and battery on the band itself, either side of the notch.
+    let widgetsInBand: Bool
 
     /// Around the notch, the drawer is at least as wide as the band so the two read as one shape.
     private var drawerWidth: CGFloat {
@@ -25,6 +28,11 @@ struct OverlayView: View {
                 UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: bandRadius, bottomTrailing: bandRadius))
                     .fill(.black)
                     .frame(width: bandWidth, height: bandHeight)
+                    .overlay {
+                        if widgetsInBand {
+                            BandWidgets(notchWidth: notchWidth)
+                        }
+                    }
                     .zIndex(1) // keep the drawer sliding out from underneath the band
 
                 if state.drawerOpen {

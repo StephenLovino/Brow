@@ -15,12 +15,16 @@ enum BandMode: String, CaseIterable {
 
 enum DrawerMode: String, CaseIterable {
     case onHover
+    /// Time and battery drawn on the band beside the notch. Falls back to `.onHover`
+    /// while pushed below the notch, since that strip is no longer drawable.
+    case inBand
     case always
     case off
 
     var title: String {
         switch self {
         case .onHover: "Show on hover"
+        case .inBand: "In the band, beside the notch"
         case .always: "Always show"
         case .off: "Hidden"
         }
