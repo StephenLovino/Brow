@@ -14,12 +14,15 @@ final class OverlayController {
     static let earWidth: CGFloat = 70
     /// Wider ears in `.notch` mode, to fit the time and battery beside the notch.
     static let widgetEarWidth: CGFloat = 104
+    static let pillWidth: CGFloat = 180
     static let drawerSize = CGSize(width: 340, height: 72)
 
     private let preferences: Preferences
     private let displayMode: DisplayModeSwitcher
     private let state = OverlayState()
     private var window: NSWindow?
+    /// Black strip behind the menu bar's contents, for `.menuBar` band mode.
+    private var menuBarBackdrop: NSWindow?
     private var geometry: NotchGeometry?
     private var bandHeight: CGFloat = 0
     private var pollTimer: Timer?
@@ -52,8 +55,9 @@ final class OverlayController {
         let geo = NotchGeometry(screen: screen)
         geometry = geo
         // While pushed below the notch, macOS already blacks out the strip, so the drawer
-        // hangs straight from the top of the menu bar instead of from a band.
-        bandHeight = displayMode.isActive ? 0 : geo.height
+        // hangs straight from the top of the menu bar instead of from a band, and widgets
+        // "in the band" sit in a small pill in the middle of the menu bar instead.
+        bandHeight = displayMode.isActive && !widgetsInPill ? 0 : geo.height
 
         // The window spans the whole screen width so it can also round off the screen's top
         // corners; it's transparent and click-through everywhere it doesn't draw.
@@ -75,8 +79,9 @@ final class OverlayController {
             roundedBand: preferences.bandMode == .notch,
             notchOffset: geo.centerX - geo.screenFrame.midX,
             cornerRadius: cornerRadius,
-            notchWidth: geo.effectiveNotchWidth,
-            widgetsInBand: widgetsInBand
+            notchWidth: widgetsInPill ? 0 : geo.effectiveNotchWidth,
+            widgetsInBand: widgetsInBand,
+            pill: widgetsInPill
         ))
         hostingView.sizingOptions = []
         window.contentView = hostingView
@@ -85,16 +90,46 @@ final class OverlayController {
         self.window = window
 
         state.drawerOpen = drawerMode == .always
+        updateMenuBarBackdrop(on: screen)
     }
 
-    /// Widgets go in the band only while there is a band beside the notch to draw on.
+    private func updateMenuBarBackdrop(on screen: NSScreen) {
+        let menuBarHeight = screen.frame.maxY - screen.visibleFrame.maxY
+        guard preferences.bandMode == .menuBar, menuBarHeight > 0 else {
+            menuBarBackdrop?.orderOut(nil)
+            return
+        }
+
+        let backdrop = menuBarBackdrop ?? makeWindow()
+        // At the menu bar's own level the window covers the menu bar's background but not
+        // its contents, so the menus and status items stay visible on solid black.
+        // One level lower and macOS moves the window out of the menu bar area entirely.
+        backdrop.level = .mainMenu
+        backdrop.isOpaque = true
+        backdrop.backgroundColor = .black
+        backdrop.setFrame(CGRect(
+            x: screen.frame.minX,
+            y: screen.frame.maxY - menuBarHeight,
+            width: screen.frame.width,
+            height: menuBarHeight
+        ), display: true)
+        backdrop.orderFrontRegardless()
+        menuBarBackdrop = backdrop
+    }
+
     private var widgetsInBand: Bool {
-        preferences.drawerMode == .inBand && !displayMode.isActive
+        // The black menu bar is full of real menu items, so there's no room for widgets on it.
+        preferences.drawerMode == .inBand && preferences.bandMode != .menuBar
     }
 
-    /// The drawer behavior in effect: "in the band" becomes "on hover" while pushed below the notch.
+    /// While pushed below the notch there's no band beside it to draw on, so the widgets
+    /// move into a pill in the middle of the menu bar, where the notch used to be.
+    private var widgetsInPill: Bool {
+        widgetsInBand && displayMode.isActive
+    }
+
     private var drawerMode: DrawerMode {
-        preferences.drawerMode == .inBand && displayMode.isActive ? .onHover : preferences.drawerMode
+        preferences.drawerMode
     }
 
     private var earWidth: CGFloat {
@@ -102,6 +137,9 @@ final class OverlayController {
     }
 
     private func bandWidth(for geo: NotchGeometry) -> CGFloat {
+        if widgetsInPill {
+            return Self.pillWidth
+        }
         switch preferences.bandMode {
         case .notch:
             return geo.effectiveNotchWidth + earWidth * 2
@@ -109,6 +147,9 @@ final class OverlayController {
             // Centered on the notch, so it must reach the farther screen edge on both sides.
             let reach = max(geo.centerX - geo.screenFrame.minX, geo.screenFrame.maxX - geo.centerX)
             return reach * 2
+        case .menuBar:
+            // The backdrop window does the blacking out; the overlay draws no band of its own.
+            return 0
         }
     }
 
@@ -130,6 +171,7 @@ final class OverlayController {
         let optionHeld = NSEvent.modifierFlags.contains(.option)
         if state.bandHidden != optionHeld {
             state.bandHidden = optionHeld
+            menuBarBackdrop?.animator().alphaValue = optionHeld ? 0 : 1
         }
 
         guard drawerMode == .onHover, let geo = geometry else { return }

@@ -13,6 +13,8 @@ struct OverlayView: View {
     let notchWidth: CGFloat
     /// Draw the time and battery on the band itself, either side of the notch.
     let widgetsInBand: Bool
+    /// Draw the band as a small pill inset into the menu bar rather than a strip at the top edge.
+    let pill: Bool
 
     /// Around the notch, the drawer is at least as wide as the band so the two read as one shape.
     private var drawerWidth: CGFloat {
@@ -25,15 +27,25 @@ struct OverlayView: View {
 
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
-                UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: bandRadius, bottomTrailing: bandRadius))
-                    .fill(.black)
-                    .frame(width: bandWidth, height: bandHeight)
-                    .overlay {
-                        if widgetsInBand {
-                            BandWidgets(notchWidth: notchWidth)
-                        }
+                Group {
+                    if pill {
+                        Capsule()
+                            .fill(.black)
+                            .frame(width: bandWidth, height: max(bandHeight - 6, 16))
+                            .overlay { BandWidgets(notchWidth: 0).scaleEffect(0.85) }
+                            .frame(height: bandHeight)
+                    } else {
+                        UnevenRoundedRectangle(cornerRadii: .init(bottomLeading: bandRadius, bottomTrailing: bandRadius))
+                            .fill(.black)
+                            .frame(width: bandWidth, height: bandHeight)
+                            .overlay {
+                                if widgetsInBand {
+                                    BandWidgets(notchWidth: notchWidth)
+                                }
+                            }
                     }
-                    .zIndex(1) // keep the drawer sliding out from underneath the band
+                }
+                .zIndex(1) // keep the drawer sliding out from underneath the band
 
                 if state.drawerOpen {
                     DrawerView()

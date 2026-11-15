@@ -21,8 +21,8 @@ Requires macOS 14 Sonoma or later, on Apple Silicon or Intel. Brow runs in the m
 
 - **Push everything below the notch**: switches the built-in display to its shorter mode (e.g. 1710×1112 → 1710×1068), so macOS puts the real menu bar and all windows under the notch and leaves the strip beside it black. The widget drawer then hangs from the middle of the menu bar. The change lasts only while Brow runs; quitting restores your resolution.
 - **Rounded top corners**: Off, Small, Medium (default) or Large. Draws black slivers in the screen's top corners so they look rounded, which matters most once everything is pushed below the notch and the new top edge has square corners.
-- **Black band**: *Around the notch* blacks out the notch plus a margin on each side. *Full width* blacks out the whole menu bar strip (menu items underneath still take clicks).
-- **Widgets**: the time, date and battery in a drawer that drops down on hover, stays open, or stays hidden. Or put the time and battery right on the band, either side of the notch. (In push-below mode that strip isn't drawable, so they fall back to the hover drawer.)
+- **Black band**: *Around the notch* blacks out the notch plus a margin on each side. *Full width* blacks out the whole menu bar strip (menu items underneath still take clicks). *Black menu bar* turns the menu bar strip solid black while the Apple menu, app menus and status icons stay visible on top, so the notch disappears into it. It works with any wallpaper, including Aerials.
+- **Widgets**: the time, date and battery in a drawer that drops down on hover, stays open, or stays hidden. Or put the time and battery right on the band, either side of the notch; in push-below mode they sit in a small pill in the middle of the menu bar instead.
 - Hold **⌥ Option** to fade the band out and see what's under it.
 
 Everything Brow draws is click-through, so it never blocks the menu bar or windows below it. Brow makes no network requests.

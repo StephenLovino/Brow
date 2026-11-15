@@ -4,11 +4,15 @@ import Combine
 enum BandMode: String, CaseIterable {
     case notch
     case fullWidth
+    /// A black backdrop at the menu bar's own level: the strip turns black but the
+    /// Apple menu, app menus and status items stay visible on top.
+    case menuBar
 
     var title: String {
         switch self {
         case .notch: "Around the notch"
         case .fullWidth: "Full width"
+        case .menuBar: "Black menu bar (keeps menu items)"
         }
     }
 }
