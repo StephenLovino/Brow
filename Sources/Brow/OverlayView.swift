@@ -10,6 +10,8 @@ struct OverlayView: View {
     let notchOffset: CGFloat
     /// Zero leaves the screen's top corners alone.
     let cornerRadius: CGFloat
+    /// Distance from the screen's top edge down to where the corners are drawn.
+    let cornerInset: CGFloat
     let notchWidth: CGFloat
     /// Draw the time and battery on the band itself, either side of the notch.
     let widgetsInBand: Bool
@@ -67,6 +69,7 @@ struct OverlayView: View {
                     Spacer(minLength: 0)
                     ScreenCorner(radius: cornerRadius, mirrored: true)
                 }
+                .padding(.top, cornerInset)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

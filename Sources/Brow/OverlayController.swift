@@ -62,7 +62,10 @@ final class OverlayController {
         // The window spans the whole screen width so it can also round off the screen's top
         // corners; it's transparent and click-through everywhere it doesn't draw.
         let cornerRadius = preferences.cornerStyle.radius
-        let height = max(bandHeight + Self.drawerSize.height, cornerRadius)
+        // With a black menu bar the corners at the screen's edge would be black on black,
+        // so round the top of the desktop just below the bar instead.
+        let cornerInset = preferences.bandMode == .menuBar ? max(screen.frame.maxY - screen.visibleFrame.maxY, 0) : 0
+        let height = max(bandHeight + Self.drawerSize.height, cornerInset + cornerRadius)
         let frame = CGRect(
             x: geo.screenFrame.minX,
             y: geo.screenFrame.maxY - height,
@@ -79,6 +82,7 @@ final class OverlayController {
             roundedBand: preferences.bandMode == .notch,
             notchOffset: geo.centerX - geo.screenFrame.midX,
             cornerRadius: cornerRadius,
+            cornerInset: cornerInset,
             notchWidth: widgetsInPill ? 0 : geo.effectiveNotchWidth,
             widgetsInBand: widgetsInBand,
             pill: widgetsInPill
