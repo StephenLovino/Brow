@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Brow</title>
+    <link>https://stephenlovino.github.io/Brow/appcast.xml</link>
+    <item>
+      <title>Brow 1.3.0</title>
+      <pubDate>Tue, 17 Nov 2026 12:16:25 +0000</pubDate>
+      <sparkle:version>9</sparkle:version>
+      <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/StephenLovino/Brow/releases/tag/v1.3.0</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<p>Brow now updates itself. Check for updates from the menu, or let it install them automatically.</p>]]></description>
+      <enclosure url="https://github.com/StephenLovino/Brow/releases/download/v1.3.0/Brow.dmg" type="application/octet-stream" sparkle:edSignature="fwg0u17OrbpUC8A66TGcH7Koq382lIQ/iCY/syzUenHISVQH/pd4Pl3Y2k99CquZ7ObwLkv1JTcssY3kUfYpCw==" length="1448684" />
+    </item>
+  </channel>
+</rss>
