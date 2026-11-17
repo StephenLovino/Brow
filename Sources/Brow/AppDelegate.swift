@@ -5,10 +5,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let displayMode = DisplayModeSwitcher()
     private var overlay: OverlayController?
     private var statusMenu: StatusMenu?
+    private var updater: Updater?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let updater = Updater()
+        self.updater = updater
         overlay = OverlayController(preferences: preferences, displayMode: displayMode)
-        statusMenu = StatusMenu(preferences: preferences, displayMode: displayMode)
+        statusMenu = StatusMenu(preferences: preferences, displayMode: displayMode, updater: updater)
 
         NotificationCenter.default.addObserver(
             self,

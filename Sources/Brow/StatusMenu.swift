@@ -3,11 +3,13 @@ import AppKit
 final class StatusMenu: NSObject, NSMenuDelegate {
     private let preferences: Preferences
     private let displayMode: DisplayModeSwitcher
+    private let updater: Updater
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
-    init(preferences: Preferences, displayMode: DisplayModeSwitcher) {
+    init(preferences: Preferences, displayMode: DisplayModeSwitcher, updater: Updater) {
         self.preferences = preferences
         self.displayMode = displayMode
+        self.updater = updater
         super.init()
 
         item.button?.image = NSImage(systemSymbolName: "rectangle.topthird.inset.filled", accessibilityDescription: "Brow")
@@ -54,7 +56,29 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         hint.isEnabled = false
         menu.addItem(hint)
 
+        if updater.isAvailable {
+            menu.addItem(.separator())
+            let check = ActionItem("Check for Updates…", checked: false) { [updater] in
+                updater.checkForUpdates()
+            }
+            check.isEnabled = updater.canCheckForUpdates
+            menu.addItem(check)
+            menu.addItem(ActionItem("Check for updates automatically", checked: updater.automaticallyChecks) { [updater] in
+                updater.automaticallyChecks.toggle()
+            })
+            let install = ActionItem("Install updates automatically", checked: updater.automaticallyInstalls) { [updater] in
+                updater.automaticallyInstalls.toggle()
+            }
+            install.isEnabled = updater.automaticallyChecks
+            menu.addItem(install)
+        }
+
         menu.addItem(.separator())
+        if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
+            let about = NSMenuItem(title: "Brow \(version)", action: nil, keyEquivalent: "")
+            about.isEnabled = false
+            menu.addItem(about)
+        }
         menu.addItem(NSMenuItem(title: "Quit Brow", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 }

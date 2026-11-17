@@ -25,7 +25,11 @@ Requires macOS 14 Sonoma or later, on Apple Silicon or Intel. Brow runs in the m
 - **Widgets**: the time, date and battery in a drawer that drops down on hover, stays open, or stays hidden. Or put the time and battery right on the band, either side of the notch; in push-below mode they sit in a small pill in the middle of the menu bar instead.
 - Hold **⌥ Option** to fade the band out and see what's under it.
 
-Everything Brow draws is click-through, so it never blocks the menu bar or windows below it. Brow makes no network requests.
+Everything Brow draws is click-through, so it never blocks the menu bar or windows below it. Brow's only network request is a daily update check against this project's GitHub Pages site (via [Sparkle](https://sparkle-project.org)); turn it off in the menu with *Check for updates automatically*. No analytics, no account.
+
+## Updates
+
+Brow updates itself with Sparkle: it checks once a day, shows what's new, and installs with one click. Use *Check for Updates…* in the menu to check now, or *Install updates automatically* to skip the prompt. Updates are signed, and Brow only installs ones signed with this project's key.
 
 ## Build from source
 

@@ -16,6 +16,11 @@
 #   APPLE_ID_USER, APPLE_APP_PASSWORD
 #                   Apple ID and app-specific password; used instead of the profile when both are set.
 #                   The team ID is read from the signed app.
+#   NOTES           one-line release notes shown in the update prompt
+#
+# Sparkle updates are signed with the EdDSA key stored in your keychain under the account "brow"
+# (created once with `.build/artifacts/sparkle/Sparkle/bin/generate_keys --account brow`).
+# After a release, commit docs/appcast.xml and upload dist/Brow.dmg to the GitHub release vVERSION.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -45,8 +50,9 @@ BIN="$(swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/Brow"
 
 echo "==> Assembling $APP"
 rm -rf "$DIST"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
 cp "$BIN" "$APP/Contents/MacOS/Brow"
+ditto "$(dirname "$BIN")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" Packaging/Info.plist > "$APP/Contents/Info.plist"
 
 ICONSET="$(mktemp -d)/AppIcon.iconset"
@@ -60,7 +66,15 @@ done
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 
 echo "==> Signing with $SIGN_IDENTITY"
-codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$APP"
+# Sparkle's helpers are signed inside-out before the framework and the app, per Sparkle's docs.
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+sign() { codesign --force --options runtime --timestamp --sign "$SIGN_IDENTITY" "$@"; }
+sign "$SPARKLE/XPCServices/Installer.xpc"
+sign --preserve-metadata=entitlements "$SPARKLE/XPCServices/Downloader.xpc"
+sign "$SPARKLE/Autoupdate"
+sign "$SPARKLE/Updater.app"
+sign "$APP/Contents/Frameworks/Sparkle.framework"
+sign "$APP"
 codesign --verify --strict --verbose=2 "$APP"
 
 ditto -c -k --keepParent "$APP" "$ZIP"
@@ -127,4 +141,27 @@ xcrun stapler staple "$DMG"
 
 spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
 shasum -a 256 "$DMG"
-echo "==> Done: $DMG"
+
+echo "==> Writing docs/appcast.xml"
+# Prints: sparkle:edSignature="..." length="..."
+SPARKLE_SIGNATURE="$(.build/artifacts/sparkle/Sparkle/bin/sign_update --account brow "$DMG")"
+cat > docs/appcast.xml <<APPCAST
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Brow</title>
+    <link>https://stephenlovino.github.io/Brow/appcast.xml</link>
+    <item>
+      <title>Brow $VERSION</title>
+      <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
+      <sparkle:version>$BUILD</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:fullReleaseNotesLink>https://github.com/StephenLovino/Brow/releases/tag/v$VERSION</sparkle:fullReleaseNotesLink>
+      <description><![CDATA[<p>${NOTES:-A new version of Brow is available.}</p>]]></description>
+      <enclosure url="https://github.com/StephenLovino/Brow/releases/download/v$VERSION/Brow.dmg" type="application/octet-stream" $SPARKLE_SIGNATURE />
+    </item>
+  </channel>
+</rss>
+APPCAST
+echo "==> Done: $DMG (commit docs/appcast.xml after uploading the DMG to release v$VERSION)"

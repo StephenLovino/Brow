@@ -28,6 +28,14 @@
     <string>14.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>SUFeedURL</key>
+    <string>https://stephenlovino.github.io/Brow/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>FmYc2gVpNlTeD371jrX0187Ka3gd+WOoijvo4nTHFDM=</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
     <key>NSHumanReadableCopyright</key>
     <string>© 2026 Stephen Jan Lovino. MIT License.</string>
 </dict>
